@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace NCalcAsync.Domain
 {
-    public class EvaluationVisitor : LogicalExpressionVisitor
+    public partial class EvaluationVisitor : LogicalExpressionVisitor
     {
         private delegate T Func<T>();
+
+        private readonly uint? _time;
 
         private readonly EvaluateOptions _options = EvaluateOptions.None;
         private readonly EvaluateParameterAsyncHandler _evaluateParameterAsync;
@@ -16,9 +18,10 @@ namespace NCalcAsync.Domain
 
         private bool IgnoreCase { get { return (_options & EvaluateOptions.IgnoreCase) == EvaluateOptions.IgnoreCase; } }
 
-        public EvaluationVisitor(EvaluateOptions options, EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync)
+        public EvaluationVisitor(EvaluateOptions options, uint? time, EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync)
         {
             _options = options;
+            _time = time;
             _evaluateParameterAsync = evaluateParameterAsync;
             _evaluateFunctionAsync = evaluateFunctionAsync;
         }
@@ -289,6 +292,9 @@ namespace NCalcAsync.Domain
 
             switch (function.Identifier.Name.ToLower())
             {
+                case "step":
+                    await VisitStep(function);
+                    break;
                 #region Abs
                 case "abs":
 

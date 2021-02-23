@@ -16,7 +16,7 @@ namespace NCalcAsync
         /// <summary>
         /// Textual representation of the expression to evaluate.
         /// </summary>
-        protected string OriginalExpression;
+        public string OriginalExpression;
 
         public EvaluateParameterAsyncHandler EvaluateParameterAsync { get; set; }
         public EvaluateFunctionAsyncHandler EvaluateFunctionAsync { get; set; }
@@ -198,9 +198,9 @@ namespace NCalcAsync
         /// Evaluate the expression asynchronously.
         /// </summary>
         /// <returns>A task that resolves to the result of the expression.</returns>
-        public async Task<object> EvaluateAsync()
+        public async Task<object> EvaluateAsync(ushort? time = null)
         {
-            return await EvaluateAsync(EvaluateParameterAsync, EvaluateFunctionAsync);
+            return await EvaluateAsync(EvaluateParameterAsync, EvaluateFunctionAsync,time);
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace NCalcAsync
         /// <param name="evaluateParameterAsync">Override the value of <see cref="EvaluateParameterAsync"/></param>
         /// <param name="evaluateFunctionAsync">Override the value of <see cref="EvaluateFunctionAsync"/></param>
         /// <returns>A task that resolves to the result of the expression.</returns>
-        public async Task<object> EvaluateAsync(EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync)
+        public async Task<object> EvaluateAsync(EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync, ushort? time = null)
         {
             if (HasErrors())
             {
@@ -221,7 +221,7 @@ namespace NCalcAsync
                 ParsedExpression = Compile(OriginalExpression, (Options & EvaluateOptions.NoCache) == EvaluateOptions.NoCache);
             }
 
-            var visitor = new EvaluationVisitor(Options, evaluateParameterAsync, evaluateFunctionAsync)
+            var visitor = new EvaluationVisitor(Options,time, evaluateParameterAsync, evaluateFunctionAsync)
             {
                 Parameters = Parameters
             };

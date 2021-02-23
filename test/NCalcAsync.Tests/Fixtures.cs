@@ -155,6 +155,25 @@ namespace NCalcAsync.Tests
         }
 
         [TestMethod]
+        public async Task ExpressionShouldEvaluateParameters2()
+        {
+            var e = new Expression("Round(Pow(Pi, 2) + Pow(MyPi, 2) + X, 2)");
+
+            e.Parameters["MyPi"] = new Expression("Pi * Pi");
+            e.Parameters["X"] = 10;
+
+            e.EvaluateParameterAsync = (name, args) =>
+            {
+                if (name == "Pi")
+                    args.Result = 3.14;
+
+                return Task.CompletedTask;
+            };
+
+            Assert.AreEqual(117.07, await e.EvaluateAsync());
+        }
+
+        [TestMethod]
         public async Task ShouldEvaluateConditionnal()
         {
             var eif = new Expression("if([divider] <> 0, [divided] / [divider], 0)");
