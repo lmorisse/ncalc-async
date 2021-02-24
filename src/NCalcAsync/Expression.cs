@@ -136,7 +136,6 @@ namespace NCalcAsync
                 var parser = new NCalcParser(new CommonTokenStream(lexer));
 
                 logicalExpression = parser.ncalcExpression().value;
-
                 if (parser.Errors != null && parser.Errors.Count > 0)
                 {
                     throw new EvaluationException(String.Join(Environment.NewLine, parser.Errors.ToArray()));
@@ -198,9 +197,9 @@ namespace NCalcAsync
         /// Evaluate the expression asynchronously.
         /// </summary>
         /// <returns>A task that resolves to the result of the expression.</returns>
-        public async Task<object> EvaluateAsync(ushort? time = null)
+        public async Task<object> EvaluateAsync(ushort? time =null, uint? step =null, float? deltaTime=null)
         {
-            return await EvaluateAsync(EvaluateParameterAsync, EvaluateFunctionAsync,time);
+            return await EvaluateAsync(EvaluateParameterAsync, EvaluateFunctionAsync,time,step,deltaTime);
         }
 
         /// <summary>
@@ -208,8 +207,11 @@ namespace NCalcAsync
         /// </summary>
         /// <param name="evaluateParameterAsync">Override the value of <see cref="EvaluateParameterAsync"/></param>
         /// <param name="evaluateFunctionAsync">Override the value of <see cref="EvaluateFunctionAsync"/></param>
+        /// <param name="time"></param>
+        /// <param name="step"></param>
+        /// <param name="deltaTime"></param>
         /// <returns>A task that resolves to the result of the expression.</returns>
-        public async Task<object> EvaluateAsync(EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync, ushort? time = null)
+        public async Task<object> EvaluateAsync(EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync, ushort? time = null, uint? step=null, float? deltaTime=1)
         {
             if (HasErrors())
             {
@@ -221,7 +223,7 @@ namespace NCalcAsync
                 ParsedExpression = Compile(OriginalExpression, (Options & EvaluateOptions.NoCache) == EvaluateOptions.NoCache);
             }
 
-            var visitor = new EvaluationVisitor(Options,time, evaluateParameterAsync, evaluateFunctionAsync)
+            var visitor = new EvaluationVisitor(Options,time, step, deltaTime, evaluateParameterAsync, evaluateFunctionAsync)
             {
                 Parameters = Parameters
             };

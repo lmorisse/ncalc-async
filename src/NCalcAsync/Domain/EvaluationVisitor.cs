@@ -10,7 +10,6 @@ namespace NCalcAsync.Domain
     {
         private delegate T Func<T>();
 
-        private readonly uint? _time;
 
         private readonly EvaluateOptions _options = EvaluateOptions.None;
         private readonly EvaluateParameterAsyncHandler _evaluateParameterAsync;
@@ -18,10 +17,12 @@ namespace NCalcAsync.Domain
 
         private bool IgnoreCase { get { return (_options & EvaluateOptions.IgnoreCase) == EvaluateOptions.IgnoreCase; } }
 
-        public EvaluationVisitor(EvaluateOptions options, uint? time, EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync)
+        public EvaluationVisitor(EvaluateOptions options, ushort? time, uint? step, float? deltaTime, EvaluateParameterAsyncHandler evaluateParameterAsync, EvaluateFunctionAsyncHandler evaluateFunctionAsync)
         {
             _options = options;
             _time = time;
+            _step = step;
+            _deltaTime = deltaTime;
             _evaluateParameterAsync = evaluateParameterAsync;
             _evaluateFunctionAsync = evaluateFunctionAsync;
         }
@@ -292,9 +293,30 @@ namespace NCalcAsync.Domain
 
             switch (function.Identifier.Name.ToLower())
             {
+                #region Specifics
+                case "ramp":
+                    await VisitRamp(function);
+                    break;
                 case "step":
                     await VisitStep(function);
                     break;
+                case "pulse":
+                    await VisitPulse(function);
+                    break;
+                case "normal":
+                    await VisitNormal(function);
+                    break;
+                case "smth1":
+                    await VisitSmth1(function);
+                    break;
+                case "smth3":
+                    await VisitSmth3(function);
+                    break;
+                case "smthn":
+                    await VisitSmthN(function);
+                    break;
+                #endregion
+
                 #region Abs
                 case "abs":
 
@@ -680,32 +702,43 @@ namespace NCalcAsync.Domain
                         expression.Parameters[p.Key] = p.Value;
                     }
 
-                    Result = await expression.EvaluateAsync(_evaluateParameterAsync, _evaluateFunctionAsync);
+                    Result = await expression.EvaluateAsync(_evaluateParameterAsync, _evaluateFunctionAsync,_time, _step, _deltaTime);
                 }
                 else
                     Result = Parameters[parameter.Name];
             }
-            else
+            else switch (parameter.Name.ToLowerInvariant())
             {
-                // The parameter should be defined in a call back method
-                var args = new ParameterArgs();
-
-                if (_evaluateParameterAsync != null)
+                // Special cases Dt, Time
+                    case "time":
+                    Result = _time;
+                    break;
+                case "dt":
+                    Result = _deltaTime;
+                    break;
+                default:
                 {
-                    var name = IgnoreCase ? parameter.Name.ToLower() : parameter.Name;
+                    // The parameter should be defined in a call back method
+                    var args = new ParameterArgs();
 
-                    // Calls external implementations, which  may be a MulticastDelegate which 
-                    // requires manual handling for async delegates.
-                    foreach (var handler in _evaluateParameterAsync.GetInvocationList().Cast<EvaluateParameterAsyncHandler>())
+                    if (_evaluateParameterAsync != null)
                     {
-                        await handler.Invoke(name, args);
+                        var name = IgnoreCase ? parameter.Name.ToLower() : parameter.Name;
+
+                        // Calls external implementations, which  may be a MulticastDelegate which 
+                        // requires manual handling for async delegates.
+                        foreach (var handler in _evaluateParameterAsync.GetInvocationList().Cast<EvaluateParameterAsyncHandler>())
+                        {
+                            await handler.Invoke(name, args);
+                        }
                     }
+
+                    if (!args.HasResult)
+                        throw new ArgumentException("Parameter was not defined", parameter.Name);
+
+                    Result = args.Result;
+                    break;
                 }
-
-                if (!args.HasResult)
-                    throw new ArgumentException("Parameter was not defined", parameter.Name);
-
-                Result = args.Result;
             }
         }
 

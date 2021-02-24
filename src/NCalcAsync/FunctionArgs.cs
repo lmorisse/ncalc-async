@@ -27,15 +27,15 @@ namespace NCalcAsync
             set { _parameters = value; }
         }
 
-        public async Task<object[]> EvaluateParametersAsync()
-        {
-            var values = new object[_parameters.Length];
-            for (int i = 0; i < values.Length; i++)
-            {
-                values[i] = await _parameters[i].EvaluateAsync();
-            }
+        //public async Task<object[]> EvaluateParametersAsync()
+        //{
+        //    var values = new object[_parameters.Length];
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        values[i] = await _parameters[i].EvaluateAsync();
+        //    }
 
-            return values;
-        }
+        //    return values;
+        //}
     }
 }
