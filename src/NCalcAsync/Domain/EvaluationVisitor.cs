@@ -294,6 +294,12 @@ namespace NCalcAsync.Domain
             switch (function.Identifier.Name.ToLower())
             {
                 #region Specifics
+                case "value":
+                    await VisitValue(function);
+                    break;
+                case "externalupdate":
+                    await VisitExternalUpdate(function);
+                    break;
                 case "ramp":
                     await VisitRamp(function);
                     break;
@@ -667,6 +673,8 @@ namespace NCalcAsync.Domain
                     throw new ArgumentException("Function not found",
                         function.Identifier.Name);
             }
+            // Last result is stored in the function
+            function.LastValue = Result;
         }
 
         private void CheckCase(string function, string called)

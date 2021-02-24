@@ -1,9 +1,11 @@
+using System;
 using System.Threading.Tasks;
 
 namespace NCalcAsync.Domain
 {
     public class Function : LogicalExpression
     {
+        public object LastValue { get; set; }
         public Function(Identifier identifier, LogicalExpression[] expressions)
         {
             Identifier = identifier;

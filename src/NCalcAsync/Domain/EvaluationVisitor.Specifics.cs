@@ -107,6 +107,33 @@ namespace NCalcAsync.Domain
             }
         }
 
+        /// <summary>
+        ///     ExternalUpdate built in function
+        ///     Used when a variable is updated at each step via an external device
+        ///     The variable has no equation so it could be removed by the optimizer
+        ///     Using this function will avoid this pitfall
+        ///     Parameter : InitialValue (Optional)
+        /// </summary>
+        /// <example>new Variable("example", "ExternalUpdate(1)")</example>
+        private async Task VisitExternalUpdate(Function function)
+        {
+            if (!_step.HasValue)
+                throw new ArgumentException("Step must not be null");
+            Result = _step == 0 && function.Expressions.Length == 1 ? Convert.ToSingle(await EvaluateAsync(function.Expressions[0])) :
+                function.LastValue??0;
+        }
+        /// <summary>
+        ///     Value built in function
+        ///     Set the value of a variable when the function is called. This value won't evolve even if the variable value does.
+        ///     Used with functions that are triggered by a starttime such as Step, Ramp, Pulse, ...
+        ///     value(variableId)
+        ///     Arguments: variableId
+        /// </summary>
+        /// <example>Value(Time) will have a return value of 1 if called at time 1 or after</example>
+        private async Task VisitValue(Function function)
+        {
+            Result = function.LastValue ?? await EvaluateAsync(function.Expressions[0]);
+        }
         #region SMTH
 
         /// <example>Smth1(Input, Averaging, initialValue(Option)) </example>

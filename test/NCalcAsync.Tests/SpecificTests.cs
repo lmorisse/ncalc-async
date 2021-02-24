@@ -62,9 +62,9 @@ namespace NCalcAsync.Tests
         {
             var e = new Expression("Pulse(20, 1)");
 
-            Assert.AreEqual(0F, await e.EvaluateAsync(null,0));
-            Assert.AreEqual(20F, await e.EvaluateAsync(null,1));
-            Assert.AreEqual(0F, await e.EvaluateAsync(null,2));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null,0,1));
+            Assert.AreEqual(20F, await e.EvaluateAsync(null,1,1));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null,2,1));
         }
         /// <summary>
         /// DeltaTime = 1 / default
@@ -75,10 +75,10 @@ namespace NCalcAsync.Tests
         {
             var e = new Expression("Pulse(20, 12, 5)");
 
-            Assert.AreEqual(0F, await e.EvaluateAsync(null,10));
-            Assert.AreEqual(20F, await e.EvaluateAsync(null, 12));
-            Assert.AreEqual(0F, await e.EvaluateAsync(null, 15));
-            Assert.AreEqual(20F, await e.EvaluateAsync(null, 17));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null,10,1));
+            Assert.AreEqual(20F, await e.EvaluateAsync(null, 12,1));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null, 15,1));
+            Assert.AreEqual(20F, await e.EvaluateAsync(null, 17,1));
         }
         /// <summary>
         /// DeltaTime = 1 / default
@@ -89,10 +89,10 @@ namespace NCalcAsync.Tests
         {
             var e = new Expression("Pulse(20, 12, 0)");
 
-            Assert.AreEqual(0F, await e.EvaluateAsync(null, 10));
-            Assert.AreEqual(20F, await e.EvaluateAsync(null, 12));
-            Assert.AreEqual(0F, await e.EvaluateAsync(null, 15));
-            Assert.AreEqual(0F, await e.EvaluateAsync(null, 17));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null, 10,1));
+            Assert.AreEqual(20F, await e.EvaluateAsync(null, 12,1));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null, 15,1));
+            Assert.AreEqual(0F, await e.EvaluateAsync(null, 17,1));
         }
         /// <summary>
         /// DeltaTime = 0.5 / default
@@ -160,6 +160,32 @@ namespace NCalcAsync.Tests
             Assert.AreEqual(5F, await e.EvaluateAsync(0, 0, 1));
             Assert.AreEqual(5F, await e.EvaluateAsync(2, 2, 1));
             Assert.IsTrue(5F < (float)await e.EvaluateAsync(4, 4, 1));
+        }
+        #endregion
+
+        #region ExternalUpdate
+
+        [DataRow("ExternalUpdate()", 0F)]// without initial value
+        [DataRow("ExternalUpdate(2)", 2F)]// with initial value
+        [TestMethod]
+        public async Task ExternalUpdateTest(string function, float result)
+        {
+            var e = new Expression(function);
+            Assert.AreEqual(result, Convert.ToSingle(await e.EvaluateAsync(1, 0, 1)));
+            Assert.AreEqual(result, Convert.ToSingle(await e.EvaluateAsync(1, 1, 1)));
+        }
+        #endregion
+
+        #region Value
+
+        [DataRow("Value(Aux1)", 2F)]// without initial value
+        [TestMethod]
+        public async Task ValueTest(string function, float result)
+        {
+            var e = new Expression(function);
+            e.Parameters.Add("Aux1",result);
+            Assert.AreEqual(result, Convert.ToSingle(await e.EvaluateAsync(1, 0, 1)));
+            Assert.AreEqual(result, Convert.ToSingle(await e.EvaluateAsync(1, 1, 1)));
         }
         #endregion
     }
