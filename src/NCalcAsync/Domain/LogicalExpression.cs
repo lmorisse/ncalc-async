@@ -7,6 +7,7 @@ namespace NCalcAsync.Domain
     public abstract class LogicalExpression
     {
         const char BS = '\\';
+        public bool RetrievedFromCache { get; set; } = false;
 
         private static string extractString(string text)
         {

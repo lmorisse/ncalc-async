@@ -715,38 +715,36 @@ namespace NCalcAsync.Domain
                 else
                     Result = Parameters[parameter.Name];
             }
-            else switch (parameter.Name.ToLowerInvariant())
+            else if (parameter.Name.EndsWith("_Time"))
             {
-                // Special cases Dt, Time
-                    case "time":
-                    Result = _time;
-                    break;
-                case "dt":
-                    Result = _deltaTime;
-                    break;
-                default:
+                Result = _time;
+            }
+            else if (parameter.Name.EndsWith("_Dt"))
+            {
+                Result = _deltaTime;
+            }
+            else
+            {
+                // The parameter should be defined in a call back method
+                var args = new ParameterArgs();
+
+                if (_evaluateParameterAsync != null)
                 {
-                    // The parameter should be defined in a call back method
-                    var args = new ParameterArgs();
+                    var name = IgnoreCase ? parameter.Name.ToLower() : parameter.Name;
 
-                    if (_evaluateParameterAsync != null)
+                    // Calls external implementations, which  may be a MulticastDelegate which 
+                    // requires manual handling for async delegates.
+                    foreach (var handler in _evaluateParameterAsync.GetInvocationList()
+                        .Cast<EvaluateParameterAsyncHandler>())
                     {
-                        var name = IgnoreCase ? parameter.Name.ToLower() : parameter.Name;
-
-                        // Calls external implementations, which  may be a MulticastDelegate which 
-                        // requires manual handling for async delegates.
-                        foreach (var handler in _evaluateParameterAsync.GetInvocationList().Cast<EvaluateParameterAsyncHandler>())
-                        {
-                            await handler.Invoke(name, args);
-                        }
+                        await handler.Invoke(name, args);
                     }
-
-                    if (!args.HasResult)
-                        throw new ArgumentException("Parameter was not defined", parameter.Name);
-
-                    Result = args.Result;
-                    break;
                 }
+
+                if (!args.HasResult)
+                    throw new ArgumentException("Parameter was not defined", parameter.Name);
+
+                Result = args.Result;
             }
         }
 

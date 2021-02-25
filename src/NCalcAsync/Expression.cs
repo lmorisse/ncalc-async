@@ -27,9 +27,11 @@ namespace NCalcAsync
 
         public Expression(string expression, EvaluateOptions options)
         {
-            if (String.IsNullOrEmpty(expression))
+            if (string.IsNullOrEmpty(expression))
+            {
                 throw new
-            ArgumentException("Expression can't be empty", "expression");
+                    ArgumentException("Expression can't be empty", "expression");
+            }
 
             OriginalExpression = expression;
             Options = options;
@@ -120,6 +122,7 @@ namespace NCalcAsync
 
                         if (wr.IsAlive && logicalExpression != null)
                         {
+                            logicalExpression.RetrievedFromCache = true;
                             return logicalExpression;
                         }
                     }
@@ -188,7 +191,7 @@ namespace NCalcAsync
 
         public string Error { get; private set; }
 
-        public LogicalExpression ParsedExpression { get; private set; }
+        public LogicalExpression ParsedExpression { get; set; }
 
         protected Dictionary<string, IEnumerator> ParameterEnumerators;
         protected Dictionary<string, object> ParametersBackup;
