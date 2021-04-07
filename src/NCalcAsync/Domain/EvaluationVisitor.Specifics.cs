@@ -130,7 +130,12 @@ namespace NCalcAsync.Domain
         ///     Arguments: variableId
         /// </summary>
         /// <example>Value(Time) will have a return value of 1 if called at time 1 or after</example>
+        [Obsolete]
         private async Task VisitValue(Function function)
+        {
+            Result = function.LastValue ?? await EvaluateAsync(function.Expressions[0]);
+        }
+        private async Task VisitInit(Function function)
         {
             Result = function.LastValue ?? await EvaluateAsync(function.Expressions[0]);
         }
