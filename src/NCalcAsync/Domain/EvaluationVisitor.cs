@@ -339,13 +339,13 @@ namespace NCalcAsync.Domain
 
                 #endregion
 
-                #region Acos
-                case "acos":
+                #region Arccos
+                case "arccos":
 
-                    CheckCase("Acos", function.Identifier.Name);
+                    CheckCase("Arccos", function.Identifier.Name);
 
                     if (function.Expressions.Length != 1)
-                        throw new ArgumentException("Acos() takes exactly 1 argument");
+                        throw new ArgumentException("Arccos() takes exactly 1 argument");
 
                     Result = Math.Acos(Convert.ToDouble(await EvaluateAsync(function.Expressions[0])));
 
@@ -353,13 +353,13 @@ namespace NCalcAsync.Domain
 
                 #endregion
 
-                #region Asin
-                case "asin":
+                #region Arcsin
+                case "arcsin":
 
-                    CheckCase("Asin", function.Identifier.Name);
+                    CheckCase("Arcsin", function.Identifier.Name);
 
                     if (function.Expressions.Length != 1)
-                        throw new ArgumentException("Asin() takes exactly 1 argument");
+                        throw new ArgumentException("Arcsin() takes exactly 1 argument");
 
                     Result = Math.Asin(Convert.ToDouble(await EvaluateAsync(function.Expressions[0])));
 
@@ -367,13 +367,13 @@ namespace NCalcAsync.Domain
 
                 #endregion
 
-                #region Atan
-                case "atan":
+                #region Arctan
+                case "arctan":
 
-                    CheckCase("Atan", function.Identifier.Name);
+                    CheckCase("Arctan", function.Identifier.Name);
 
                     if (function.Expressions.Length != 1)
-                        throw new ArgumentException("Atan() takes exactly 1 argument");
+                        throw new ArgumentException("Arctan() takes exactly 1 argument");
 
                     Result = Math.Atan(Convert.ToDouble(await EvaluateAsync(function.Expressions[0])));
 
