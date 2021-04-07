@@ -294,6 +294,9 @@ namespace NCalcAsync.Domain
             switch (function.Identifier.Name.ToLower())
             {
                 #region Specifics
+                case "value":
+                    await VisitValue(function);
+                    break;
                 case "init":
                     await VisitInit(function);
                     break;
