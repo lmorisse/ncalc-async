@@ -294,6 +294,9 @@ namespace NCalcAsync.Domain
             switch (function.Identifier.Name.ToLower())
             {
                 #region Specifics
+                case "value":
+                    await VisitValue(function);
+                    break;
                 case "init":
                     await VisitInit(function);
                     break;
@@ -522,6 +525,27 @@ namespace NCalcAsync.Domain
 
                     break;
 
+                #endregion
+
+                #region Safediv
+                case "safediv":
+
+                    CheckCase("Safediv", function.Identifier.Name);
+
+                    if (function.Expressions.Length > 3 && function.Expressions.Length < 2)
+                        throw new ArgumentException("Sign() takes exactly 3 arguments");
+
+                    if (function.Expressions.Length == 3)
+                    {
+                        if (Convert.ToDouble(await EvaluateAsync(function.Expressions[1])) == 0)
+                        {
+                            Result = Convert.ToDouble(await EvaluateAsync(function.Expressions[0])) / Convert.ToDouble(await EvaluateAsync(function.Expressions[2]));
+                        } else
+                        {
+                            Result = Convert.ToDouble(await EvaluateAsync(function.Expressions[0])) / Convert.ToDouble(await EvaluateAsync(function.Expressions[1]));
+                        }
+                    } else { Result = 0; }
+                    break;
                 #endregion
 
                 #region Sign
